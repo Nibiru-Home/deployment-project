@@ -5,7 +5,7 @@ RUN apt-get install -y git
  
 RUN mkdir /opt/app
 WORKDIR /opt/app
-RUN git clone https://github.com/Nibiru-Home/tienda-admin-fronted.git
+RUN git clone -b develop https://github.com/Nibiru-Home/tienda-admin-fronted.git
 WORKDIR /opt/app/tienda-admin-fronted
 RUN npm ci
 RUN npm run build --prod
