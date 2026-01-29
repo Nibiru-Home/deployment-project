@@ -1,0 +1,105 @@
+services:
+
+  tienda-cliente-front:
+    build:
+      context: .
+      dockerfile: nibiru-home-tienda-cliente-font.Dockerfile
+    container_name: nibiru-home-tienda-cliente-front
+    ports:
+      - "80:80"
+    networks:
+      - proxy_red
+
+  tienda-admin-front:
+    build:
+      context: .
+      dockerfile: nibiru-home-tienda-admin-font.Dockerfile
+    container_name: nibiru-home-tienda-admin-front
+    ports:
+      - "4206:80"
+    networks:
+      - proxy_red
+
+  banco-front:
+    build:
+      context: .
+      dockerfile: nibiru-home-banco-front.Dockerfile
+    container_name: nibiru-home-bank-front
+    ports:
+      - "4205:80"
+    networks:
+      - proxy_red
+
+  tienda-back:
+    build:
+      context: .
+      dockerfile: nibiru-home-tienda-back.Dockerfile
+    container_name: nibiru-home-tienda-back
+    ports:
+      - "8085:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-tienda:3306/nibiru-home
+      SPRING_DATASOURCE_USERNAME: nibiruHome
+      SPRING_DATASOURCE_PASSWORD: nibiruHome
+    depends_on:
+      mariadb-tienda:
+        condition: service_healthy
+    networks:
+      - proxy_red
+
+  banco-back:
+    build:
+      context: .
+      dockerfile: nibiru-home-banco-back.Dockerfile
+    container_name: nibiru-home-bank-back
+    ports:
+      - "8086:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb-banco:3306/nibirubank
+      SPRING_DATASOURCE_USERNAME: nibiruHome
+      SPRING_DATASOURCE_PASSWORD: nibiruHome
+    depends_on:
+      mariadb-banco:
+        condition: service_healthy
+    networks:
+      - proxy_red
+
+  mariadb-tienda:
+    image: mariadb:latest
+    container_name: mariadb-tienda-nibiru-home
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: nibiru-home
+      MYSQL_USER: nibiruHome
+      MYSQL_PASSWORD: nibiruHome
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks:
+      - proxy_red
+
+  mariadb-banco:
+    image: mariadb:latest
+    container_name: mariadb-banco-nibiru-home
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: nibirubank
+      MYSQL_USER: nibiruHome
+      MYSQL_PASSWORD: nibiruHome
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks:
+      - proxy_red
+
+networks:
+  proxy_red:
+    driver: bridge
+
+
